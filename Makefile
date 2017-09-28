@@ -6,20 +6,21 @@
 #*   By: psebasti <sebpalluel@free.fr>              +#+  +:+       +#+        *#
 #*                                                +#+#+#+#+#+   +#+           *#
 #*   Created: 2017/01/23 15:37:07 by psebasti          #+#    #+#             *#
-#*   Updated: 2017/09/25 13:43:15 by psebasti         ###   ########.fr       *#
+#*   Updated: 2017/09/28 20:51:07 by psebasti         ###   ########.fr       *#
 #*                                                                            *#
 #* ************************************************************************** *#
 
 NAME = get_next_line
 
 SRC = get_next_line.c \
-	  main.c
+	main.c
+	#gnl1_3.c
 
 OBJ		=	$(SRC:.c=.o)
 
 CMP		=	gcc
 
-FLAGS	=	-Wall -Wextra -Werror
+FLAGS	=	-ggdb -Wall -Wextra -Werror
 
 LIB = -L libft/ -lft
 
