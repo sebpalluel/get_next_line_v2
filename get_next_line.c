@@ -6,7 +6,7 @@
 /*   By: psebasti <sebpalluel@free.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/01/23 14:46:00 by psebasti          #+#    #+#             */
-/*   Updated: 2017/09/27 23:41:51 by psebasti         ###   ########.fr       */
+/*   Updated: 2017/09/28 17:12:52 by psebasti         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,7 +78,7 @@ static void			copy_line(size_t length, t_fd *fd, char **target)
 	//printf("test\n");
 	if (!fd->end)
 	{
-	//	printf("!end\n");
+	  //	printf("!end\n");
 		prev = current;
 		current = current->next;
 		free(prev);
@@ -97,20 +97,23 @@ static int			buffer_has_line(t_fd *fd, char **target)
 	if (current == NULL)
 		*target = NULL;
 	length = 0;
-	printf("current %p\n", current);
-	while (current != NULL && current->c != '\n' && current->c )
+	//printf("current %p\n", current);
+	while (current != NULL && current->c != '\n')
 	{
-		if (fd->end && current->next == NULL)
-		{
-			//		printf("break MTF\n");
-			length++;
-			break ;
-		}
+		//if (fd->end && )
+		//{
+		//	//		printf("break MTF\n");
+		//	length++;
+		//	break ;
+		//}
 		current = current->next;
 		length++;
+		//printf("current->c %c\n", current->c);
+	//	printf("length %lu\n", length);
 	}
-	if (current != NULL)
+	if (current != NULL || (fd->end && length > 0))
 	{
+	//	printf("current %p before line, length %lu\n", current, length);
 		fd->had_line = 1;
 		copy_line(length, fd, target);
 		return (1);
@@ -121,32 +124,32 @@ static int			buffer_has_line(t_fd *fd, char **target)
 int					get_next_line(const int fd, char **line)
 {
 	static t_fd		fd_tab[OPEN_MAX];
-	int				ret;
 
-	ret = read(fd, NULL, 0);
 	//printf("loop\n");
-	if (fd < 0 || fd > OPEN_MAX || line == NULL || ret < 0)
+	if (fd < 0 || fd > OPEN_MAX || line == NULL || read(fd, NULL, 0))
 		return (READ_ERR);
 	//if (buffer_has_line(&fd_tab[fd], line))
 	//{
 	//	printf("last line\n");
 	//	return (READ_OK);
 	//}
-	buffer_has_line(&fd_tab[fd], line);
-	printf("end ? %lu\n", fd_tab[fd].end);
-	if (fd_tab[fd].end)
-		return(READ_EOF);
-	fd_tab[fd].ret = 1;
+	//printf("end ? %lu\n", fd_tab[fd].end);
 	//printf("loop before while\n");
-	while (!buffer_has_line(&fd_tab[fd], line) && fd_tab[fd].ret > 0)
+	while ((fd_tab[fd].ret = read_buff(fd, fd_tab)) >= 0 && !fd_tab[fd].end)
 	{
-		fd_tab[fd].ret = read_buff(fd, fd_tab);
-		fd_tab[fd].end = (fd_tab[fd].ret == 0) ? 1 : 0;
-	//	printf("ret %d\n", fd_tab[fd].ret);
+	fd_tab[fd].end = (fd_tab[fd].ret == 0) ? 1 : 0;
+		if (buffer_has_line(&fd_tab[fd], line))
+			return (READ_OK);
+		//	printf("ret %d\n", fd_tab[fd].ret);
 		//	printf("fd->end %lu\n", fd_tab[fd].end);
 	}
-	printf("end while ret %d\n", fd_tab[fd].ret);
+	if (fd_tab[fd].end)
+		return(READ_EOF);
+	//printf("end while ret %d\n", fd_tab[fd].ret);
 	if (fd_tab[fd].ret < 0)
 		return (READ_ERR);
-	return (READ_OK);
+	if (!buffer_has_line(&fd_tab[fd], line))
+		return (READ_EOF);
+	//printf("last\n");
+		return (READ_OK);
 }
